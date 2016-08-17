@@ -11,7 +11,7 @@ void MyLine( Mat img, Point start, Point end )
   line( img,
         start,
         end,
-        Scalar( 204, 0, 255 ),
+        Scalar( 20, 210, 25 ),
         1,
         8 );
 }
@@ -106,7 +106,7 @@ int main() {
 		Mat curGImage;
 		cvtColor( smallImage, curGImage, CV_BGR2GRAY );
 		Mat corners, showImage;
-        goodFeaturesToTrack(curGImage, corners, 0, 0.01, 0.1, noArray(), 3, false, 0.04);
+        goodFeaturesToTrack(curGImage, corners, 0, 0.05, 0.2, noArray(), 3, false, 0.04);
         for(int l=0;l<corners.rows;l++) {
         	float* curPoint = corners.ptr<float>(l);
         	int i = curPoint[1], j = curPoint[0]*3;
@@ -133,20 +133,29 @@ int main() {
 				continue;
 			}
 			fir = (fir).inv(DECOMP_LU);
-			Mat sec = fir * tp1.t() * tp2;
-			// curMotX[i] = sec.ptr<double>(0)[0];
-			// curMotY[j/3] = sec.ptr<double>(1)[0];
-			// cout<<sec.ptr<double>(0)[0]<<endl;//<<"  "<<curMotY[j/3]<<endl;
-			// MyLine(motionMat, Point(i, j/3), Point(i + 3*sec.ptr<double>(0)[0], (j/3 + 3*sec.ptr<double>(1)[0])));
+			Mat sec = fir * tp1.t();
+			Mat pre;
+			sec.copyTo(pre);
+			sec = sec * tp2;
+			int it = 3;
+			while(it--) {
+				Mat rb = tp1 * sec - tp2;
+				sec = sec - pre * rb;
+			}
 			double len = sqrt(sec.ptr<double>(0)[0]*sec.ptr<double>(0)[0] + sec.ptr<double>(1)[0]*sec.ptr<double>(1)[0]);
-			if(len > 1 && len < 10) {
-				double m = 0 - sec.ptr<double>(1)[0] / sec.ptr<double>(0)[0];
-				// cout<<m<<endl;
-				// cout<<sec.ptr<double>(1)[0]<<endl<<endl<<endl;
+			if(len > 1 && len < 4) {
+				double m = 0 + sec.ptr<double>(1)[0] / sec.ptr<double>(0)[0];
 				// MyLine(motionMat, Point(j/3, i), Point(j/3 + 3*sec.ptr<double>(0)[0], (i - 3*sec.ptr<double>(1)[0])));
 				double p = -1/m;
-				MyLine(motionMat, Point(j/3 + 3/sqrt(1+p*p), i - 3*p/(sqrt(1+p*p))), Point(j/3 + 15*sec.ptr<double>(0)[0]/sqrt(1+m*m), i - 15*m*sec.ptr<double>(1)[0]/(sqrt(1+m*m))));
-				MyLine(motionMat, Point(j/3 - 3/sqrt(1+p*p), i + 3*p/(sqrt(1+p*p))), Point(j/3 + 15*sec.ptr<double>(0)[0]/sqrt(1+m*m), i - 15*m*sec.ptr<double>(1)[0]/(sqrt(1+m*m))));
+				MyLine(motionMat, Point(j/3, i), Point(j/3, i));
+				if(sec.ptr<double>(0)[0] > 0) {
+					MyLine(motionMat, Point(j/3 + 3/sqrt(1+p*p), i - 3*p/(sqrt(1+p*p))), Point(j/3 + 15*len/sqrt(1+m*m), i - 15*m*len/(sqrt(1+m*m))));
+					MyLine(motionMat, Point(j/3 - 3/sqrt(1+p*p), i + 3*p/(sqrt(1+p*p))), Point(j/3 + 15*len/sqrt(1+m*m), i - 15*m*len/(sqrt(1+m*m))));
+				}
+				else {
+					MyLine(motionMat, Point(j/3 + 3/sqrt(1+p*p), i - 3*p/(sqrt(1+p*p))), Point(j/3 - 15*len/sqrt(1+m*m), i + 15*m*len/(sqrt(1+m*m))));
+					MyLine(motionMat, Point(j/3 - 3/sqrt(1+p*p), i + 3*p/(sqrt(1+p*p))), Point(j/3 - 15*len/sqrt(1+m*m), i + 15*m*len/(sqrt(1+m*m))));
+				}
 			}
         }
 
