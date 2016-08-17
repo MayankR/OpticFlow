@@ -93,7 +93,7 @@ int main() {
 	                                1, 2, 1);
 		filter2D(smallImage_64F, dy, smallImage_64F.depth(), kern);
 
-		int sqSize = 5;
+		int sqSize = 21;
 		Mat tp1(sqSize*sqSize, 2, CV_64FC1, 1);
 		Mat tp2(sqSize*sqSize, 1, CV_64FC1, 1);
 		Mat motionXMat(diff.rows, diff.cols, CV_64FC1, 1);
@@ -116,7 +116,7 @@ int main() {
 				double* curx = dx.ptr<double>(k);
 				double* cury = dy.ptr<double>(k);
 				double* curd = diff.ptr<double>(k);
-				for(int l=j-6;l<j+7;l=l+3) {
+				for(int l=j-30;l<j+31;l=l+3) {
 
 					double* curtp1 = tp1.ptr<double>(tp);
 					double* curtp2 = tp2.ptr<double>(tp);
@@ -143,20 +143,20 @@ int main() {
 				sec = sec - pre * rb;
 			}
 			double len = sqrt(sec.ptr<double>(0)[0]*sec.ptr<double>(0)[0] + sec.ptr<double>(1)[0]*sec.ptr<double>(1)[0]);
-			if(len > 1 && len < 4) {
+			// if(len > 1 && len < 4) {
 				double m = 0 + sec.ptr<double>(1)[0] / sec.ptr<double>(0)[0];
-				// MyLine(motionMat, Point(j/3, i), Point(j/3 + 3*sec.ptr<double>(0)[0], (i - 3*sec.ptr<double>(1)[0])));
+				// MyLine(motionMat, Point(j/3, i), Point(j/3 + 6*sec.ptr<double>(0)[0], (i - 6*sec.ptr<double>(1)[0])));
 				double p = -1/m;
 				MyLine(motionMat, Point(j/3, i), Point(j/3, i));
 				if(sec.ptr<double>(0)[0] > 0) {
-					MyLine(motionMat, Point(j/3 + 3/sqrt(1+p*p), i - 3*p/(sqrt(1+p*p))), Point(j/3 + 15*len/sqrt(1+m*m), i - 15*m*len/(sqrt(1+m*m))));
-					MyLine(motionMat, Point(j/3 - 3/sqrt(1+p*p), i + 3*p/(sqrt(1+p*p))), Point(j/3 + 15*len/sqrt(1+m*m), i - 15*m*len/(sqrt(1+m*m))));
+					MyLine(motionMat, Point(j/3 + 3/sqrt(1+p*p), i - 3*p/(sqrt(1+p*p))), Point(j/3 + 25*len/sqrt(1+m*m), i - 25*m*len/(sqrt(1+m*m))));
+					MyLine(motionMat, Point(j/3 - 3/sqrt(1+p*p), i + 3*p/(sqrt(1+p*p))), Point(j/3 + 25*len/sqrt(1+m*m), i - 25*m*len/(sqrt(1+m*m))));
 				}
 				else {
-					MyLine(motionMat, Point(j/3 + 3/sqrt(1+p*p), i - 3*p/(sqrt(1+p*p))), Point(j/3 - 15*len/sqrt(1+m*m), i + 15*m*len/(sqrt(1+m*m))));
-					MyLine(motionMat, Point(j/3 - 3/sqrt(1+p*p), i + 3*p/(sqrt(1+p*p))), Point(j/3 - 15*len/sqrt(1+m*m), i + 15*m*len/(sqrt(1+m*m))));
+					MyLine(motionMat, Point(j/3 + 3/sqrt(1+p*p), i - 3*p/(sqrt(1+p*p))), Point(j/3 - 25*len/sqrt(1+m*m), i + 25*m*len/(sqrt(1+m*m))));
+					MyLine(motionMat, Point(j/3 - 3/sqrt(1+p*p), i + 3*p/(sqrt(1+p*p))), Point(j/3 - 25*len/sqrt(1+m*m), i + 25*m*len/(sqrt(1+m*m))));
 				}
-			}
+			// }
         }
 
 
