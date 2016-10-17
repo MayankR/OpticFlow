@@ -17,15 +17,19 @@ void MyLine( Mat img, Point start, Point end )
 }
 
 int main() {
-	// VideoCapture cap("testfootage.mp4");
-	VideoCapture cap(0);
+	//Use following line to read frames from video
+	VideoCapture cap("test2.mp4");
+	//Use following line to read frames from camera
+	// VideoCapture cap(0);
+
+	//Check for error in input method
 	if(!cap.isOpened()) {
 		cout<<"Unable to open camera";
 		exit(-1);
 	}
 
 	Mat image;
-	int FPS=24, iRows, iCols, ratio=2;
+	int FPS=24, iRows, iCols, ratio=1;
 	cap>>image;
 	// image = imread("im1.jpg", 1);
 	cout<<"rows: "<<image.rows<<" cols: "<<image.cols<<" ch: "<<image.channels()<<" "<<image.isContinuous()<<endl;
@@ -106,11 +110,11 @@ int main() {
 		Mat curGImage;
 		cvtColor( smallImage, curGImage, CV_BGR2GRAY );
 		Mat corners, showImage;
-        goodFeaturesToTrack(curGImage, corners, 0, 0.05, 0.2, noArray(), 3, false, 0.04);
+        goodFeaturesToTrack(curGImage, corners, 0, 0.05, 0.02, noArray(), 3, false, 0.04);
         for(int l=0;l<corners.rows;l++) {
         	float* curPoint = corners.ptr<float>(l);
         	int i = curPoint[1], j = curPoint[0]*3;
-
+        	if(i<15) continue;
         	tp=0;
         	for(int k=i-sqSize/2;k<i+1+sqSize/2;k++) {
 				double* curx = dx.ptr<double>(k);
@@ -143,7 +147,7 @@ int main() {
 				sec = sec - pre * rb;
 			}
 			double len = sqrt(sec.ptr<double>(0)[0]*sec.ptr<double>(0)[0] + sec.ptr<double>(1)[0]*sec.ptr<double>(1)[0]);
-			// if(len > 1 && len < 4) {
+			if(len > 0.05) {
 				double m = 0 + sec.ptr<double>(1)[0] / sec.ptr<double>(0)[0];
 				// MyLine(motionMat, Point(j/3, i), Point(j/3 + 6*sec.ptr<double>(0)[0], (i - 6*sec.ptr<double>(1)[0])));
 				double p = -1/m;
@@ -156,7 +160,7 @@ int main() {
 					MyLine(motionMat, Point(j/3 + 3/sqrt(1+p*p), i - 3*p/(sqrt(1+p*p))), Point(j/3 - 25*len/sqrt(1+m*m), i + 25*m*len/(sqrt(1+m*m))));
 					MyLine(motionMat, Point(j/3 - 3/sqrt(1+p*p), i + 3*p/(sqrt(1+p*p))), Point(j/3 - 25*len/sqrt(1+m*m), i + 25*m*len/(sqrt(1+m*m))));
 				}
-			// }
+			}
         }
 
 
